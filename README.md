@@ -26,10 +26,11 @@ analyses.
 ### Fan Configurations
 I'll only be testing a subset of all possible fan combinations on my system, which is housed in a CoolerMaster HAF 912 
 Mid Tower case. With support for a variety of 120mm, 140mm and a single optional 200mm fan, theres nearly infinite 
-combinations available. Even with the six, 120mm fans I have available, there's a staggering 216 options (6^3) if you 
-consider fans can be pointing in, out, or be altogether disabled. Assuming fans are better off than on still creates 36 
+combinations available. Even with the six 120mm fans I have available, there's a staggering 216 options (6^3) if you 
+consider fans can be pointing in, out, or be altogether disabled. Assuming fans are more useful on than off still creates 36 
 (6^2) options, so I'll only be testing a small subset of these, relying on a couple hypotheses to test out. Of course, 
-anyone is welcome to a more exhaustive testing on their own systems.
+anyone is welcome to a more exhaustive testing on their own systems as certain cases will almost definitely have 
+different optimal performances.
 
 #### Configurations used
 
@@ -46,7 +47,7 @@ back of the case.
     |   - -        |
     | -   CPU      |
     |              |
-    | GUP  +      +|
+    | GPU  +      +|
     |----          |
     |PSU|         +|
     ----------------
@@ -55,10 +56,10 @@ back of the case.
 ## Layout
 
 ### /testing
-Testing contains the scripts responsible for running stress tests together.
+Testing contains the scripts responsible for running stress tests and logging them.
 
-### /logging
-Logging contains the scripts responsible for logging temperatures.
+### /log
+Top-level directory for log files created by scripts in /testing
 
 ### /analysis
 Analysis contains mostly Python scripts for processing the created data into more usable forms, then plotting and 
