@@ -21,10 +21,10 @@ def plot(title, filepath: Path, limits=None, minor_ticks=None, major_ticks=None,
 	:param list minor_ticks: list of values along x-axis at which to place minor ticks
 	:param list major_ticks: list of values along x-axis at which to place major ticks
 	:param str x_label_str: label to be placed below x-axis
-	:param str y_label_str: label to be placed below y-axis
+	:param str y_label_str: label to be placed next to the y-axis
 	:param tuple vertical_annotations: any vertical lines to be plotted in the form (('name', x), ...)
 	:param tuple horizontal_annotations: any horizontal lines to be plotted in the form (('name', y), ...)
-	:param iterable color_set: iterable containing valid matplotlib colors;
+	:param any iterable color_set: iterable containing valid matplotlib colors;
 		default scheme courtesy of Color Brewer (http://colorbrewer2.org/#type=qualitative&scheme=Set1&n=8)
 	:param kwargs: kwarg pairs of {'name of parameter': (x, y)}
 	:return:
@@ -83,23 +83,28 @@ def plotyy(title, filepath: Path, limits_y1=None, limits_y2=None, minor_ticks=No
 		 color_set_y2 = ('#66c2a5','#fc8d62','#8da0cb','#e78ac3','#a6d854','#ffd92f','#e5c494','#b3b3b3'),
 		 **kwargs):
 	"""
-	Plots x, y coordinates with a single y-axis as a line graph with optional axis labels, tick control and a default
-	color scheme.
 
 	:param str title: title to be displayed on the plot
 	:param Path filepath: pathlib Path where file will be saved, can relative to dir function is called in, or absolute
-	:param dict limits: optional dictionary of limits including ['top','bottom','right','left']
+	:param dict limits_y1: optional dictionary of limits including ['top','bottom','right','left']
+	:param dict limits_y2: optional dictionary of limits including ['top','bottom','right','left']; NOTE: x limits given
+	by limits_y2 *WILL* overwrite x limits given in limits_y1
 	:param list minor_ticks: list of values along x-axis at which to place minor ticks
 	:param list major_ticks: list of values along x-axis at which to place major ticks
-	:param str x_label_str: label to be placed below x-axis
-	:param str y_label_str: label to be placed below y-axis
+	:param x_label_str: label to be placed below x-axis
+	:param str y1_label_str: label to be placed next to the left y-axis
+	:param str y2_label_str: label to be placed next to the right y-axis
 	:param tuple vertical_annotations: any vertical lines to be plotted in the form (('name', x), ...)
-	:param tuple horizontal_annotations: any horizontal lines to be plotted in the form (('name', y), ...)
-	:param generator color_set: generator containing valid matplotlib colors;
-		default scheme courtesy of Color Brewer (http://colorbrewer2.org/#type=qualitative&scheme=Dark2&n=8)
-	:param kwargs: kwarg pairs of {'name of parameter': (x, y, axis: int)}
+	:param tuple horizontal_annotations_y1: any horizontal lines to be plotted in the form (('name', y), ...) on axis 1
+	:param tuple horizontal_annotations_y2: any horizontal lines to be plotted in the form (('name', y), ...) on axis 2
+	:param iterable color_set_y1: any iterable containing valid matplotlib colors;
+		default scheme courtesy of Color Brewer (http://colorbrewer2.org/#type=qualitative&scheme=Set1&n=8)
+	:param iterable color_set_y2: any iterable containing valid matplotlib colors;
+		default scheme courtesy of Color Brewer (http://colorbrewer2.org/#type=qualitative&scheme=Set2&n=8)
+	:param kwargs: kwarg pairs of {'name of parameter': (x, y, axis)} where axis=1 will plot on the first axis
 	:return:
 	"""
+
 	from matplotlib import pyplot as plt
 
 	color_set_y1 = (c for c in color_set_y1)  # convert to a generator to allow multiple sources to pull the next color
