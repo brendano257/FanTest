@@ -1,5 +1,7 @@
 # A Linux System Temperature Testing Experiment
 
+![GPU Temperatures and Fan Speed 15 Minute Test](media/gpu_YY.png)
+
 ##### Stress testing a system is inherently taxing - you assume all responsibility for making sure you test your hardware appropriately.
 
 When building a new system, it's easy to gloss over some seemingly insignificant details, like which directions to point 
@@ -68,4 +70,6 @@ further analyzing the subsequent data.
 
 ## Notes
 [1]: Initial 15-minute tests showed that GPU and CPU temperatures *approached* idle at the five-minute mark after stress-testing for 10 minutes.
+
+![CPU Temperatures 15 Minute Test](/media/cpu.png)
 
