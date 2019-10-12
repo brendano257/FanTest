@@ -1,23 +1,24 @@
-# A Linux Temperature Testing Experiment
+# A Linux System Temperature Testing Experiment
+
+##### Stress testing a system is inherently taxing - you assume all responsibility for making sure you test your hardware appropriately.
 
 When building a new system, it's easy to gloss over some seemingly insignificant details, like which directions to point 
 your fans. Multiple logics exist, like your fans should direct air from the front to the back of the case, or it's 
 better to create negative pressure drawing air out of the case. Of course, any logical hypothesis sounds good, 
 but how to they actually work in practice?
 
-Here, I set out to figure that out, testing a couple common configurations with my six 120mm fans and a rigorous testing 
-method.
+Here, I set out to figure that out, testing a couple common configurations with my six 120mm fans and a semi-rigorous testing method.
 
 ## Methodology
 
 With any experiment, a sound methodology is needed to get reliable and repeatable results. To do this, I'll be implementing the same configuration for every test. Once a fan configuration is created, the tests will proceed as follows:
 
 1) System is booted without networking, and left idle for 15 minutes. This should nearly eliminate differences in 
-running state. No other applications will be run at the time of testing and the system will be left alone. 
+running state. No other applications will be intentionally run at the time of testing and the system will be left alone. 
 
-2) Tests will be run from bash scripts to ensure similar timing and logging across multiple configurations. 
+2) Tests will be run from bash scripts to ensure repeatability. 
 
-3) Multiple runs on the same fan configuration will be spaced by [TK] minutes to allow for a complete cool-down to idle 
+3) Multiple runs on the same fan configuration will be spaced by 5 minutes to allow for a complete[1] cool-down to idle 
 temperatures before repeat tests.
 
 4) A minimum of three trials will be conducted on each configuration, and first checked for consistency before other 
@@ -64,3 +65,7 @@ Top-level directory for log files created by scripts in /testing
 ### /analysis
 Analysis contains mostly Python scripts for processing the created data into more usable forms, then plotting and 
 further analyzing the subsequent data.
+
+## Notes
+[1]: Initial 15-minute tests showed that GPU and CPU temperatures *approached* idle at the five-minute mark after stress-testing for 10 minutes.
+
