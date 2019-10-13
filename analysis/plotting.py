@@ -66,9 +66,10 @@ def plot(title, filepath: Path, limits=None, minor_ticks=None, major_ticks=None,
 	ax.tick_params(axis='both', which='major', size=8, width=2, labelsize=15)
 	f1.set_size_inches(8, 4.5)  # same as 16:9, ie widescreen
 
-	ax.set_ylabel(y_label_str, fontsize=20)
-	ax.set_xlabel(x_label_str, fontsize=20)
-	ax.set_title(title)
+	ax.set_ylabel(y_label_str, fontsize=15)
+	ax.set_xlabel(x_label_str, fontsize=15)
+
+	ax.set_title(title, fontsize=20)
 	ax.legend(legend_keys)
 
 	f1.subplots_adjust(bottom=.20)
@@ -158,7 +159,7 @@ def plotyy(title, filepath: Path, limits_y1=None, limits_y2=None, minor_ticks=No
 
 	[i.set_linewidth(2) for i in ax1.spines.values()]
 
-	f1.set_size_inches(8, 5)  # same as 16:9, ie widescreen
+	f1.set_size_inches(8, 4.5)  # same as 16:9, ie widescreen
 
 	ax1.set_ylabel(y1_label_str, fontsize=15)
 	ax2.set_ylabel(y2_label_str, fontsize=15)
@@ -186,7 +187,7 @@ if __name__ == '__main__':
 
 	from parse_files_to_json import load_from_json
 
-	all_measurements = load_from_json(Path('/home/brendan/FanTest/analysis/json/2019_10_12_13_17_run_log.json'))
+	all_measurements = load_from_json(Path('/home/brendan/FanTest/analysis/json/2019_10_13_09_58_run_log.json'))
 
 	data_pairs = [
 		(m.get('date'), m.get('GPU'), m.get('GPU Fan'), m.get('CPU-0'),
@@ -214,7 +215,7 @@ if __name__ == '__main__':
 
 	plot('CPU Over Time', Path('/home/brendan/FanTest/analysis/plots/cpu.png'),
 		 limits={'top': 90, 'bottom': 25, 'left': 0, 'right': right_lim},
-		 vertical_annotations=(('Stressing Stopped', 600),),
+		 vertical_annotations=(('Stressing Stopped', 1800),),
 		 **{
 			 'CPU 0': (seconds, CPU0),
 			 'CPU 1': (seconds, CPU1),
@@ -227,7 +228,7 @@ if __name__ == '__main__':
 	plotyy('GPU Temperature and Fan Speed', Path('/home/brendan/FanTest/analysis/plots/gpu_YY.png'),
 		   limits_y1={'top': 90, 'bottom': 25, 'left': 0, 'right': right_lim},
 		   y2_label_str= 'Rotations Per Minute (RPM)',
-		   vertical_annotations=(('Stressing Stopped', 600),),
+		   vertical_annotations=(('Stressing Stopped', 1800),),
 		   **{'GPU': (seconds, GPU_temps, 1),
 			  'GPU Fan': (seconds, GPU_fan, 2)})
 
