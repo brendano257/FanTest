@@ -6,7 +6,14 @@ from datetime import datetime
 DATA_PATH = Path(os.getcwd()) / 'data'
 JSON_PATH = Path(os.getcwd()) / 'json'
 
+
 def parse_log_file(path: Path):
+	"""
+	Reads a log file and returns a list containing all measurements as dictionaries of date and temperature/fan params.
+
+	:param Path path: pathlib path to the file to be parsed
+	:return list: list containing all measurement dictionaries
+	"""
 
 	FMT = '%Y-%m-%dT%H:%M:%S%z'  # date format for GNU ISO-8601 (except colon in tz/offset)
 
@@ -57,16 +64,29 @@ def parse_log_file(path: Path):
 	return all_measurements
 
 
-for file in [f for f in DATA_PATH.iterdir() if f.is_file() and f.suffix == '.txt']:
-	measurements_dict = parse_log_file(file)
+def write_to_json(path: Path):
+	"""
+	Writes the created measurements list to a JSON file with the same name as the input file (but with .json)
 
-	json_file_path = JSON_PATH / file.name.replace('.txt', '.json')
+	:param Path path: pathlib Path to the file that was read for the data.
+	:return: None
+	"""
+	measurements_dict = parse_log_file(path)
+
+	json_file_path = JSON_PATH / path.name.replace('.txt', '.json')
 
 	with json_file_path.open('w') as f:
 		f.write(json.dumps(measurements_dict).replace('},', '},\n'))
+		print(f'Wrote {json_file_path.name}')
 
 
 def load_from_json(path: Path):
+	"""
+	Reads the specified JSON file and returns the list of measurement dictionaries with a datetime date
+
+	:param Path path: pathlib path to the file to be read back in
+	:return list: list containing all measurement dictionaries
+	"""
 	with path.open('r') as f:
 		measurements = json.loads(f.read())
 
@@ -76,7 +96,7 @@ def load_from_json(path: Path):
 
 		return measurements
 
-# contents = load_from_json(Path('/home/brendan/FanTest/analysis/json/2019_10_10_14_35_run_log.json'))
-#
-# for el in contents:
-# 	print(el)
+
+if __name__ == "__main__":
+	for file in [f for f in DATA_PATH.iterdir() if f.is_file() and f.suffix == '.txt']:
+		write_to_json(file)
