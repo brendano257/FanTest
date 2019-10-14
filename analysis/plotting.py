@@ -26,7 +26,7 @@ def plot(title, filepath: Path, limits=None, minor_ticks=None, major_ticks=None,
 	:param tuple horizontal_annotations: any horizontal lines to be plotted in the form (('name', y), ...)
 	:param any iterable color_set: iterable containing valid matplotlib colors;
 		default scheme courtesy of Color Brewer (http://colorbrewer2.org/#type=qualitative&scheme=Set1&n=8)
-	:param kwargs: kwarg pairs of {'name of parameter': (x, y)}
+	:param kwargs: kwarg pairs of {'name of parameter': (x, y, alpha)}
 	:return:
 	"""
 	from matplotlib import pyplot as plt
@@ -49,8 +49,11 @@ def plot(title, filepath: Path, limits=None, minor_ticks=None, major_ticks=None,
 
 	legend_keys = [key for key in kwargs]
 
-	for name, (x, y) in kwargs.items():
-		ax.plot(x, y, color=next(color_set))
+	for name, (x, y, *args) in kwargs.items():
+		alpha = (args and args.pop(0)) or 1  # returns 1 or removes and uses the first extra el after x, y
+		color = (args and args.pop(0)) or next(color_set) # returns 1 or removes and uses the NEXT extra el after x, y, alpha
+
+		ax.plot(x, y, color=color, alpha=alpha)
 
 	if vertical_annotations:
 		for line in vertical_annotations:
@@ -115,7 +118,9 @@ def plotyy(title, filepath: Path, limits_y1=None, limits_y2=None, minor_ticks=No
 	ax1 = f1.gca()
 	ax2 = ax1.twinx()
 
-	for limits, axis in zip((limits_y1, limits_y2), (ax1, ax2)):  # apply limits to axes separately
+	axes = (ax1, ax2)  # reference together so they can be indexed from here or used separately
+
+	for limits, axis in zip((limits_y1, limits_y2), axes):  # apply limits to axes separately
 		if limits:
 			axis.set_xlim(right=limits.get('right'))
 			axis.set_xlim(left=limits.get('left'))
@@ -129,15 +134,20 @@ def plotyy(title, filepath: Path, limits_y1=None, limits_y2=None, minor_ticks=No
 
 	legend_keys_ax1 = []
 	legend_keys_ax2 = []
+	legend_keys = (legend_keys_ax1, legend_keys_ax2)  # allow legend key sets to be indexed from here or used separately
 
-	for name, (x, y, axis) in kwargs.items():
-		if axis is 1:
-			ax1.plot(x, y, color=next(color_set_y1))
-			legend_keys_ax1.append(name)
+	color_sets = (color_set_y1, color_set_y2)  # reference together so they can be indexed from here or used separately
 
-		if axis is 2:
-			ax2.plot(x, y, color=next(color_set_y2))
-			legend_keys_ax2.append(name)
+	for name, (x, y, axis, *args) in kwargs.items():
+
+		print(args)
+
+		alpha = (args and args.pop(0)) or 1  # returns 1 or removes and uses the first extra el after x, y, axis
+		color = (args and args.pop(0)) or next(color_sets[axis])
+		# returns 1 or removes and uses the NEXT extra el after x, y, axis, alpha
+
+		axes[axis].plot(x, y, color=color, alpha=alpha)
+		legend_keys[axis].append(name)
 
 	if vertical_annotations:
 		for line in vertical_annotations:
@@ -184,52 +194,41 @@ def plot_gpu_and_cpu(path: Path):
 
 if __name__ == '__main__':
 	from math import ceil
+	from statistics import mean
 
 	from parse_files_to_json import load_from_json
 
 	all_measurements = load_from_json(Path('/home/brendan/FanTest/analysis/json/2019_10_13_09_58_run_log.json'))
 
-	data_pairs = [
-		(m.get('date'), m.get('GPU'), m.get('GPU Fan'), m.get('CPU-0'),
-		 m.get('CPU-1'), m.get('CPU-2'), m.get('CPU-3'), m.get('CPU-4'), m.get('CPU-5'))
-		for m in all_measurements if m.get('date')]
+	# re-pack params from all_measurements into linear lists to guarantee line-up accross all parameters
+	params = {}
+	for m in all_measurements:
+		if m.get('date'):
+			for param in ['date', 'GPU', 'GPU Fan'] + [f'CPU-{num}' for num in range(6)]:
+				try:
+					params[param].append(m.get(param))
+				except KeyError:
+					params[param] = [m.get(param)]
 
-	dates = [d[0] for d in data_pairs]
-	GPU_temps = [d[1] for d in data_pairs]
-	GPU_fan = [d[2] for d in data_pairs]
-	CPU0 = [d[3] for d in data_pairs]
-	CPU1 = [d[4] for d in data_pairs]
-	CPU2 = [d[5] for d in data_pairs]
-	CPU3 = [d[6] for d in data_pairs]
-	CPU4 = [d[7] for d in data_pairs]
-	CPU5 = [d[8] for d in data_pairs]
+	params['seconds'] = [(d - params['date'][0]).total_seconds() for d in params['date']]
+	params['CPU'] = [mean([m.get(core) for core in [f'CPU-{num}' for num in range(6)]]) for m in all_measurements]
+	# return list of means for all cores
 
-	seconds = [(d - dates[0]).total_seconds() for d in dates]
+	right_lim = ceil(params['seconds'][-1] / 200) * 200  # hacky right limit by rounding to nearest >= 200s
 
-	right_lim = ceil(seconds[-1] / 200) * 200  # hacky right limit by rounding to nearest >= 200s
-
-	plot('GPU Over Time', Path('/home/brendan/FanTest/analysis/plots/gpu.png'),
-		 limits={'top': 90, 'bottom': 25, 'left': 0, 'right': right_lim},
-		 vertical_annotations=(('Stressing Stopped', 600),),
-		 **{'GPU': (seconds, GPU_temps)})
-
-	plot('CPU Over Time', Path('/home/brendan/FanTest/analysis/plots/cpu.png'),
+	plot('CPU Over Time', Path('/home/brendan/FanTest/analysis/plots/cpu_6core.png'),
 		 limits={'top': 90, 'bottom': 25, 'left': 0, 'right': right_lim},
 		 vertical_annotations=(('Stressing Stopped', 1800),),
 		 **{
-			 'CPU 0': (seconds, CPU0),
-			 'CPU 1': (seconds, CPU1),
-			 'CPU 2': (seconds, CPU2),
-			 'CPU 3': (seconds, CPU3),
-			 'CPU 4': (seconds, CPU4),
-			 'CPU 5': (seconds, CPU5),
-		 })
+			 f'CPU {num}': (params['seconds'], params[f'CPU-{num}'], .5) for num in range(6)
+		 },
+		 CPU=(params['seconds'], params['CPU'], 1, '#525252'))
 
 	plotyy('GPU Temperature and Fan Speed', Path('/home/brendan/FanTest/analysis/plots/gpu_YY.png'),
 		   limits_y1={'top': 90, 'bottom': 25, 'left': 0, 'right': right_lim},
 		   y2_label_str= 'Rotations Per Minute (RPM)',
 		   vertical_annotations=(('Stressing Stopped', 1800),),
-		   **{'GPU': (seconds, GPU_temps, 1),
-			  'GPU Fan': (seconds, GPU_fan, 2)})
+		   **{'GPU': (params['seconds'], params['GPU'], 0, 1, '#000000'),
+			  'GPU Fan': (params['seconds'], params['GPU Fan'], 1, .5, '#525252')})
 
 
